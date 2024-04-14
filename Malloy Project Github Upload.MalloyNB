@@ -1,0 +1,83 @@
+>>>markdown
+Welcome, this data analyzes Video Games sales throughout the 2000s.
+- It is meant to demonstrate Malloy
+- This analysis will show useful facts about Video games in order to help developers understand their Market
+>>>markdown
+Below is the Dataset and a Preview of the Data
+>>>malloy
+source: VGS is duckdb.table('VG Dataset/VGsalez.csv') extend {}
+
+run:  VGS -> {
+    select: *
+    limit: 10}
+>>>markdown
+What Genre is Most Commonly Used When Making a Video Game
+>>>malloy
+# bar_chart
+run: VGS -> {
+    group_by: Genre
+    aggregate: Games is count(Rank)}
+>>>markdown
+What Genre is the Best Selling? (Total, AVG, and Over Time)
+>>>malloy
+
+run: VGS -> {
+    group_by: Genre
+    aggregate: Sales is count(Global_Sales)}
+>>>malloy
+run: VGS -> {
+    group_by: Genre
+    aggregate: avg_sales is avg(Global_Sales)}
+>>>malloy
+# line_chart
+run: VGS -> {
+    group_by: Release
+    order_by: Release asc
+    where: Release != 'N/A'
+    aggregate: Sales is count(Global_Sales)
+    group_by: Genre}
+>>>markdown
+What is the Percent of Total Sales by Each Region for different Genres?
+>>>malloy
+
+# dashboard
+run: VGS -> {
+group_by: Genre
+aggregate: 
+# percent
+Europe is avg(EU_Sales) / avg(Global_Sales),
+# percent
+Japan is avg(JP_Sales) / avg(Global_Sales),
+# percent
+America is avg(NA_Sales) / avg(Global_Sales),
+# percent
+Other is avg(Other_Sales) / avg(Global_Sales)
+}
+>>>markdown
+What Publishers have Sold the Most Video Games over Time?
+>>>malloy
+# dashboard
+run: VGS -> {
+    group_by: Publisher
+    aggregate: Sales is count(Global_Sales)
+    # line_chart
+    nest: top_sales is {
+        group_by: Release
+        order_by: Release asc
+        where: Release != 'N/A'
+        aggregate: Sales is count(Global_Sales)
+        group_by: Publisher}
+    }
+  
+>>>markdown
+What Publishers have Sold Best in Different Regions?
+>>>malloy
+# dashboard
+run: VGS -> {
+group_by: Publisher
+aggregate: 
+Europe is avg(EU_Sales),
+Japan is avg(JP_Sales),
+America is avg(NA_Sales),
+Other is avg(Other_Sales)
+}
